@@ -1,7 +1,8 @@
 from django.db import models
 from core.models import BaseModel
-from account.models import Account
+from account.models import CustomUser as Account
 from product.models import Product
+from discount.models import Discount
 
 class Order(BaseModel):
     STATUS_CHOICES = (
@@ -19,7 +20,7 @@ class Order(BaseModel):
     user = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='orders')
     status = models.CharField(max_length=50, choices=STATUS_CHOICES)
     payment_method = models.CharField(max_length=50, choices=PAYMENT_METHOD_CHOICES)
-    discount_code = models.CharField(max_length=50, null=True, blank=True)
+    discount_code = models.ForeignKey(Discount, on_delete=models.SET_NULL, null=True, blank=True)
     address = models.TextField()
 
     def __str__(self):

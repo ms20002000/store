@@ -27,6 +27,7 @@ class CustomUser(BaseModel, AbstractBaseUser, PermissionsMixin):
         MANAGER = "M", _("Manager")  
         SUPERVISOR = "S", _("Supervisor")  
         OPERATOR = "O", _("Operator")  
+        CUSTOMER = "C", _("Customer")
     
     phone_number = models.CharField(max_length=15, unique=True)
     first_name = models.CharField(max_length=30, blank=True)
@@ -36,12 +37,12 @@ class CustomUser(BaseModel, AbstractBaseUser, PermissionsMixin):
         upload_to='profile_pictures/', default="profile_pictures/default.jpeg"
     )
     address = models.TextField(blank=True, null=True)
-    role = models.CharField(max_length=50, choices=JobSpecialty.choices, null=True, blank=True)
+    role = models.CharField(max_length=50, choices=JobSpecialty.choices, default=JobSpecialty.CUSTOMER)
 
     is_active = models.BooleanField(default=True)
 
     USERNAME_FIELD = 'phone_number'
-    REQUIRED_FIELDS = ['first_name', 'last_name', 'email', 'phone_number']
+    REQUIRED_FIELDS = ['first_name', 'last_name', 'email']
 
     objects = CustomUserManager()
 
