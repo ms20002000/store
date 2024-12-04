@@ -15,6 +15,7 @@ class CustomUserManager(BaseUserManager):
 
     def create_superuser(self, phone_number, password=None, **extra_fields):
         extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('role', self.model.JobSpecialty.MANAGER)  
 
         if extra_fields.get('role') != self.model.JobSpecialty.MANAGER:
@@ -40,6 +41,7 @@ class CustomUser(BaseModel, AbstractBaseUser, PermissionsMixin):
     role = models.CharField(max_length=50, choices=JobSpecialty.choices, default=JobSpecialty.CUSTOMER)
 
     is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'phone_number'
     REQUIRED_FIELDS = ['first_name', 'last_name', 'email']
