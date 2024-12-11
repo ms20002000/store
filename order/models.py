@@ -21,7 +21,7 @@ class Order(BaseModel):
     status = models.CharField(max_length=50, choices=STATUS_CHOICES)
     payment_method = models.CharField(max_length=50, choices=PAYMENT_METHOD_CHOICES)
     discount_code = models.ForeignKey(Discount, on_delete=models.SET_NULL, null=True, blank=True)
-    address = models.TextField()
+    address = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return f"Order {self.id} - {self.status}"
