@@ -15,8 +15,8 @@ class CustomUser(BaseModel, AbstractBaseUser, PermissionsMixin):
         CUSTOMER = "C", _("Customer")
     
     phone_number = models.CharField(max_length=15, unique=True)
-    first_name = models.CharField(max_length=30, blank=True)
-    last_name = models.CharField(max_length=30, blank=True)
+    first_name = models.CharField(max_length=30)
+    last_name = models.CharField(max_length=30)
     email = models.EmailField(unique=True, max_length=50)
     profile_picture = models.ImageField(
         upload_to='accounts/', default="accounts/default.jpg"
@@ -60,19 +60,27 @@ class OTPCode(BaseModel):
     @classmethod
     def save_otp_to_redis(cls, email, otp_code):
         redis_client = cls.run_redis()
-        redis_client.set(f'otp_{email}', otp_code, ex=300)
+        redis_client.set(f'otp_{email}', otp_code, ex=600)
         
 
     @classmethod
     def save_user_data_to_redis(cls, email, data):
         redis_client = cls.run_redis()
         data_json = json.dumps(data)
-        redis_client.set(f'user_data_{email}', data_json, ex=300)
+        redis_client.set(f'user_data_{email}', data_json, ex=600)
     
     @classmethod
-    def get_otp(cls,data, email):
+    def get_otp_code(cls, email):
         redis_client = cls.run_redis()
-        return redis_client.get(f'{data}_{email}')
+        return redis_client.get(f'otp_{email}')
+    
+    @classmethod
+    def get_user_data(cls, email):
+        redis_client = cls.run_redis()
+        user_data = redis_client.get(f'user_data_{email}')
+        if user_data:
+            return json.loads(user_data.decode()) 
+        return None
 
     @staticmethod
     def generate_code():
