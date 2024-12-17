@@ -3,7 +3,7 @@ from core.models import BaseModel
 from discount.models import Discount
 
 class Category(BaseModel):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
     category_photo = models.ImageField(upload_to='categories/', default='categories/default.jpg')
     parent = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='subcategories')
 
@@ -11,7 +11,7 @@ class Category(BaseModel):
         return self.name
 
 class Product(BaseModel):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
     brand = models.CharField(max_length=255)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.TextField()

@@ -28,21 +28,15 @@ class ProductSearchView(ListAPIView):
     search_fields = ['name', 'brand', 'description']  
 
 
-class ProductsByCategoryView(APIView):
-    def get(self, request, category_id):
-        try:
-            category = Category.objects.get(id=category_id)
-            products = category.products.all()
-            serializer = ProductSerializer(products, many=True)
-            return Response(serializer.data)
-        except Category.DoesNotExist:
-            return Response({"error": "Category not found"}, status=404)
+class CategoryProductsView(ListAPIView):
+    serializer_class = ProductSerializer
 
+    def get_queryset(self):
+        category_name = self.kwargs['name']  
+        return Product.objects.filter(category__name=category_name)
+    
 
 class CategoryListView(ListAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
-class CategoryDetailView(RetrieveAPIView):
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
