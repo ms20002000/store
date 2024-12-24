@@ -16,6 +16,13 @@ class ProductListView(ListAPIView):
     serializer_class = ProductSerializer
     pagination_class = CustomPagination
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        limit = self.request.query_params.get('limit')
+        if limit:
+            queryset = queryset[:int(limit)]
+        return queryset
+    
 class ProductDetailView(RetrieveAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
@@ -37,6 +44,13 @@ class CategoryProductsView(ListAPIView):
     
 
 class CategoryListView(ListAPIView):
-    queryset = Category.objects.all()
+    queryset = Category.objects.filter(parent=None)
     serializer_class = CategorySerializer
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        limit = self.request.query_params.get('limit')
+        if limit:
+            queryset = queryset[:int(limit)]
+        return queryset
 

@@ -7,6 +7,7 @@ from .serializers import UserRegistrationSerializer
 from .utils import send_otp_email
 from rest_framework_simplejwt.tokens import RefreshToken
 
+
 class RegisterView(APIView):
     def get(self, request):
         serializer = UserRegistrationSerializer()
@@ -44,35 +45,48 @@ class VerifyOTPView(APIView):
         stored_otp = OTPCode.get_otp_code(email)
             
         if stored_otp and stored_otp.decode() == otp_code:
-            print(login)
-            if login:
+            if login == 'true':
                 user = CustomUser.objects.get(email=email)
                 refresh = RefreshToken.for_user(user)
-                return Response({
-                    "access": str(refresh.access_token),
-                    "refresh": str(refresh)
+                response = Response({
+                    "message": "Login successful.",
+                    "refresh": str(refresh),  
                 }, status=status.HTTP_200_OK)
+                
+                # set access token in cookie
+                response.set_cookie(
+                    key='access_token',
+                    value=str(refresh.access_token),
+                    httponly=True, 
+                    samesite='Lax',  
+                )
+                return response
             
             if (user_data:=OTPCode.get_user_data(email)):
                 user_serializer = UserRegistrationSerializer(data=user_data)
                 if user_serializer.is_valid():
                     user = user_serializer.save()
-                
-                    # add group customer
-                    # customer_group, _ = Group.objects.get_or_create(name='Customer')
-                    # user.groups.add(customer_group)
-
                     refresh = RefreshToken.for_user(user)
-                    return Response({
-                        "access": str(refresh.access_token),
-                        "refresh": str(refresh)
+
+                    response = Response({
+                        "message": "Registration successful.",
+                        "refresh": str(refresh),  
                     }, status=status.HTTP_201_CREATED)
+
+                    # set access token in cookie
+                    response.set_cookie(
+                        key='access_token',
+                        value=str(refresh.access_token),
+                        httponly=True,
+                        samesite='Lax',
+                    )
+                    return response
+                
                 return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
             return Response({"error": "User data not found. Please restart registration."}, status=status.HTTP_400_BAD_REQUEST)
         
         return Response({"error": "Invalid OTP."}, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 class LoginView(APIView):
