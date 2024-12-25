@@ -4,16 +4,16 @@ from discount.models import Discount
 from django.core.validators import URLValidator
 
 
+
 class Category(BaseModel):
     name = models.CharField(max_length=255, unique=True)
-    # category_photo = models.ImageField(upload_to='categories/', default='categories/default.jpg')
     parent = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='subcategories')
     category_photo = models.URLField(
         max_length=200,
         blank=True,
         null=True,
         validators=[URLValidator()],
-        default="https://127.0.0.1/media/categories/default.jpg"
+        default="https://res.cloudinary.com/dodrvhrz7/image/upload/v1735037850/default_gseslf.jpg"
     )
 
     def __str__(self):
@@ -30,7 +30,7 @@ class Product(BaseModel):
     prerequisite = models.CharField(max_length=255)
 
     def __str__(self):
-        return f"{self.name} ({self.brand})"
+        return f"{self.name}"
 
     
 class ProductFile(BaseModel):

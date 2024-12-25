@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
@@ -10,30 +11,6 @@ class CustomPagination(PageNumberPagination):
     page_size = 10  
     page_size_query_param = 'page_size'
     max_page_size = 100
-
-class ProductListView(ListAPIView):
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
-    pagination_class = CustomPagination
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        limit = self.request.query_params.get('limit')
-        if limit:
-            queryset = queryset[:int(limit)]
-        return queryset
-    
-class ProductDetailView(RetrieveAPIView):
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
-
-
-class ProductSearchView(ListAPIView):
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
-    filter_backends = [SearchFilter]
-    search_fields = ['name', 'brand', 'description']  
-
 
 class CategoryProductsView(ListAPIView):
     serializer_class = ProductSerializer
@@ -53,4 +30,37 @@ class CategoryListView(ListAPIView):
         if limit:
             queryset = queryset[:int(limit)]
         return queryset
+    
+class ProductListView(ListAPIView):
+    queryset = Product.objects.prefetch_related('product_file').all()
+    serializer_class = ProductSerializer
+    pagination_class = CustomPagination
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        limit = self.request.query_params.get('limit')
+        if limit:
+            queryset = queryset[:int(limit)]
+        return queryset
+
+
+class ProductDetailView(RetrieveAPIView):
+    serializer_class = ProductSerializer
+
+    def get_object(self):
+        product_name = self.kwargs['name']
+        product = get_object_or_404(
+            Product.objects.prefetch_related('product_file', 'topic_file'), 
+            name=product_name
+        )
+        return product
+
+
+class ProductSearchView(ListAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    filter_backends = [SearchFilter]
+    search_fields = ['name', 'brand', 'description']  
+
+
 

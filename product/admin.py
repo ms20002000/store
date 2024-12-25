@@ -1,20 +1,43 @@
 from django.contrib import admin
-from product.models import Category, Product
+from .models import Category, Product, ProductFile, TopicFile, Attributes
+
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ('name', 'parent', 'created_at', 'updated_at')
-    search_fields = ('name',)
-    list_filter = ('created_at',)
+    list_display = ('name', 'parent', 'category_photo')
+    search_fields = ('name',)  
+    list_filter = ('parent',)
     ordering = ('name',)
-    readonly_fields = ('created_at', 'updated_at')
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'price', 'category', 'created_at', 'updated_at')
-    list_filter = ('category', 'created_at')
-    search_fields = ('name', 'description')
-    ordering = ('name',)
-    readonly_fields = ('created_at', 'updated_at')
+    list_display = ('name', 'teacher', 'price', 'category', 'discount', 'course_time', 'prerequisite')  
+    search_fields = ('name', 'teacher', 'category__name') 
+    list_filter = ('category', 'discount')  
+    ordering = ('name',) 
+    list_per_page = 20 
+    fields = ('name', 'teacher', 'price', 'description', 'category', 'discount', 'course_time', 'prerequisite')
 
 
+@admin.register(ProductFile)
+class ProductFileAdmin(admin.ModelAdmin):
+    list_display = ('product', 'product_movie', 'product_photo')  
+    search_fields = ('product__name',)  
+    list_filter = ('product',)  
+    ordering = ('product',)  
+
+
+@admin.register(TopicFile)
+class TopicFileAdmin(admin.ModelAdmin):
+    list_display = ('name', 'product', 'product_movie', 'product_photo')  
+    search_fields = ('name', 'product__name')  
+    list_filter = ('product',)
+    ordering = ('name',)  
+
+
+@admin.register(Attributes)
+class AttributesAdmin(admin.ModelAdmin):
+    list_display = ('name', 'value')
+    search_fields = ('name', 'value')  
+    list_filter = ('name',)
+    ordering = ('name',)  
