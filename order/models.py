@@ -14,7 +14,6 @@ class Order(models.Model):
     PAYMENT_METHOD_CHOICES = (
         ('credit_card', 'Credit Card'),
         ('paypal', 'PayPal'),
-        ('cash', 'Cash'),
     )
 
     created_at = models.DateTimeField(auto_now_add=True)

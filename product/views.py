@@ -31,6 +31,25 @@ class CategoryListView(ListAPIView):
             queryset = queryset[:int(limit)]
         return queryset
     
+class CategoryDetailView(RetrieveAPIView):
+    serializer_class = CategorySerializer
+
+    def get_object(self):
+        category_name = self.kwargs['name']
+        category = get_object_or_404(
+            Category.objects.filter(name=category_name)   
+        )
+        return category
+    
+class SubcategoryListView(ListAPIView):
+    serializer_class = CategorySerializer
+
+    def get_queryset(self):
+        parent_name = self.kwargs.get('parent_name')  
+        parent = get_object_or_404(Category, name=parent_name)  
+        return Category.objects.filter(parent=parent)
+
+    
 class ProductListView(ListAPIView):
     queryset = Product.objects.prefetch_related('product_file').all()
     serializer_class = ProductSerializer
