@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'product',
     'order',
     'discount',
+    'contact_us',
     'rest_framework',
     'rest_framework_simplejwt',
     'drf_spectacular',
