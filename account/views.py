@@ -6,6 +6,7 @@ from .models import CustomUser, OTPCode
 from .serializers import UserRegistrationSerializer
 from .utils import send_otp_email
 from rest_framework_simplejwt.tokens import RefreshToken
+import json
 
 
 class RegisterView(APIView):
@@ -51,13 +52,15 @@ class VerifyOTPView(APIView):
                 response = Response({
                     "message": "Login successful.",
                     "refresh": str(refresh),  
+                    "email": email,
+                    "profile_picture": user.profile_picture,
                 }, status=status.HTTP_200_OK)
                 
                 # set access token in cookie
                 response.set_cookie(
                     key='access_token',
                     value=str(refresh.access_token),
-                    httponly=True, 
+                    httponly=False, 
                     samesite='Lax',  
                 )
                 return response
@@ -71,6 +74,8 @@ class VerifyOTPView(APIView):
                     response = Response({
                         "message": "Registration successful.",
                         "refresh": str(refresh),  
+                        "email": email,
+                        "profile_picture": user.profile_picture,
                     }, status=status.HTTP_201_CREATED)
 
                     # set access token in cookie

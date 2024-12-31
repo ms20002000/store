@@ -7,6 +7,7 @@ from .models import Product, Category
 from .serializers import ProductSerializer, CategorySerializer
 from rest_framework.filters import SearchFilter
 
+
 class CustomPagination(PageNumberPagination):
     page_size = 10  
     page_size_query_param = 'page_size'

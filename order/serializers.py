@@ -2,11 +2,14 @@ from rest_framework import serializers
 from .models import Order, OrderItem
 from product.models import Product
 from discount.models import Coupon
+from product.serializers import ProductSerializer
 
 class OrderItemSerializer(serializers.ModelSerializer):
+    # product = ProductSerializer(many=True)
     class Meta:
         model = OrderItem
         fields = ['product', 'price']
+
 
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True)
@@ -14,7 +17,7 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ['user', 'status', 'payment_method', 'coupon_code', 'total_price', 'items']
+        fields = ['user', 'status', 'total_price', 'items', 'coupon_code']
 
     def validate(self, data):
         for item in data['items']:
@@ -37,6 +40,7 @@ class OrderSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         items_data = validated_data.pop('items')
         coupon = validated_data.pop('coupon', None)
+        validated_data.pop('coupon_code', None) 
         order = Order.objects.create(coupon=coupon, **validated_data)
 
         for item_data in items_data:

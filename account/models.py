@@ -5,6 +5,8 @@ from django.utils.translation import gettext_lazy as _
 from .managers import CustomUserManager
 import random, json
 from redis import Redis
+from django.core.validators import URLValidator
+
 
 
 class CustomUser(BaseModel, AbstractBaseUser, PermissionsMixin):
@@ -18,8 +20,12 @@ class CustomUser(BaseModel, AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
     email = models.EmailField(unique=True, max_length=50)
-    profile_picture = models.ImageField(
-        upload_to='accounts/', default="accounts/default.jpg"
+    profile_picture = models.URLField(
+        max_length=200,
+        blank=True,
+        null=True,
+        validators=[URLValidator()],
+        default="https://res.cloudinary.com/dodrvhrz7/image/upload/v1735643606/dummy-profile_duj4ez.png"
     )
     address = models.TextField(blank=True, null=True)
     role = models.CharField(max_length=50, choices=JobSpecialty.choices, default=JobSpecialty.CUSTOMER)
