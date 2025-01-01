@@ -4,6 +4,8 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from .serializers import OrderSerializer
 from .models import Order
+from discount.models import Coupon
+from django.utils.timezone import now
 
 class CreateOrderView(APIView):
     permission_classes = [IsAuthenticated]
@@ -17,6 +19,17 @@ class CreateOrderView(APIView):
 
             if not cart or len(cart) == 0:
                 return Response({"error": "Cart is empty."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # check discount code
+            if Coupon.objects.filter(code=discount_code).exists():
+                discount = Coupon.objects.get(code=discount_code)
+                if discount.expire_at < now() or discount.is_used:
+                    discount_code = ''
+                else:
+                    discount.mark_as_used()
+            else:
+                discount_code = ''
+                    
 
             order_data = {
                 "user": user.id, 
@@ -39,6 +52,9 @@ class CreateOrderView(APIView):
                     status=status.HTTP_201_CREATED
                 )
 
+            print(discount_code)
+            print(total_price)
+            print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
