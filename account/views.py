@@ -25,7 +25,7 @@ class RegisterView(APIView):
 
             otp_code = OTPCode.generate_code()
             OTPCode.save_otp_to_redis(email, otp_code)
-            send_otp_email(email, otp_code)
+            send_otp_email.delay(email, otp_code)
             OTPCode.save_user_data_to_redis(email, serializer.data)
 
             return Response({
@@ -105,7 +105,7 @@ class LoginView(APIView):
             user = CustomUser.objects.get(email=email)
             otp_code = OTPCode.generate_code()
             OTPCode.save_otp_to_redis(email, otp_code)
-            send_otp_email(email, otp_code)
+            send_otp_email.delay(email, otp_code)
             return Response({"message": "OTP sent to your email"}, status=status.HTTP_200_OK)
         except CustomUser.DoesNotExist:
             return Response({"error": "User not found. Please register first."}, status=status.HTTP_404_NOT_FOUND)

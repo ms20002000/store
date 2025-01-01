@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-0+g-h^w&#vh&(z0rnu*ie@u^-74p!0_x#sr7^yj=1tluztsi3s
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -94,6 +94,17 @@ DATABASES = {
 # DATABASES = {
 # 'default': {
 #     'ENGINE': 'django.db.backends.postgresql',
+#     'NAME': 'test',
+#     'USER': 'mohammad',
+#     'PASSWORD': '1234',
+#     'HOST': 'db', 
+#     'PORT': '5432', 
+#     }
+# }
+
+# DATABASES = {
+# 'default': {
+#     'ENGINE': 'django.db.backends.postgresql',
 #     'NAME': 'store',
 #     'USER': 'mohammad',
 #     'PASSWORD': '',
@@ -138,9 +149,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
-STATICFILES_DIRS = [
-    BASE_DIR / 'static',
-]
+# STATICFILES_DIRS = [
+#     BASE_DIR / 'static',
+# ]
+STATIC_ROOT = BASE_DIR / 'static'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -196,3 +208,7 @@ SPECTACULAR_SETTINGS = {
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
 }
+
+# celery config
+CELERY_BROKER_URL = "amqp://guest:guest@localhost:5672/"
+CELERY_RESULT_BACKEND = "redis://localhost:6379"
