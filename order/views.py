@@ -21,17 +21,34 @@ class CreateOrderView(APIView):
                 return Response({"error": "Cart is empty."}, status=status.HTTP_400_BAD_REQUEST)
 
             # check discount code
-            if Coupon.objects.filter(code=discount_code).exists():
-                discount = Coupon.objects.get(code=discount_code)
-                if discount.expire_at < now() or discount.is_used:
-                    discount_code = ''
-                else:
-                    discount.mark_as_used()
-            else:
-                discount_code = ''
-                    
+            discount_code = self.validate_discount(discount_code)
 
-            order_data = {
+            order_data = self.set_order_data(user, cart, total_price, discount_code)
+            serializer = OrderSerializer(data=order_data)
+            if serializer.is_valid():
+                order = serializer.save()  
+                return Response(
+                    {"order_id": order.id, "message": "Order created successfully."},
+                    status=status.HTTP_201_CREATED
+                )
+            print(serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+    def validate_discount(self, discount_code):
+        try:
+            discount = Coupon.objects.get(code=discount_code)
+            if discount.expire_at < now() or discount.is_used:
+                return ''
+            else:
+                discount.mark_as_used()
+            return discount_code
+        except Coupon.DoesNotExist:
+            return ''
+        
+    def set_order_data(self, user, cart, total_price, discount_code):
+        order_data = {
                 "user": user.id, 
                 "status": "completed",
                 "total_price": total_price,
@@ -43,21 +60,7 @@ class CreateOrderView(APIView):
                 ],
                 "coupon_code": discount_code
             }
-
-            serializer = OrderSerializer(data=order_data)
-            if serializer.is_valid():
-                order = serializer.save()  
-                return Response(
-                    {"order_id": order.id, "message": "Order created successfully."},
-                    status=status.HTTP_201_CREATED
-                )
-
-            print(discount_code)
-            print(total_price)
-            print(serializer.errors)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return order_data
 
 
 class UserOrderListView(APIView):

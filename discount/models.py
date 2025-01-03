@@ -1,6 +1,6 @@
+import uuid
 from django.db import models
 from core.models import BaseModel
-import uuid
 from django.utils.timezone import now
 
 

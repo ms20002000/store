@@ -82,7 +82,7 @@ class VerifyOTPView(APIView):
                     response.set_cookie(
                         key='access_token',
                         value=str(refresh.access_token),
-                        httponly=True,
+                        httponly=False,
                         samesite='Lax',
                     )
                     return response

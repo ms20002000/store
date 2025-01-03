@@ -13,6 +13,10 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from datetime import timedelta
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+
+# Access environment variables as if they came from the actual environment
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,12 +26,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-0+g-h^w&#vh&(z0rnu*ie@u^-74p!0_x#sr7^yj=1tluztsi3s'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+ALLOWED_HOSTS = [os.getenv('ALLOWED_HOSTS')]
 
-ALLOWED_HOSTS = ['*']
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = bool(int(os.getenv('DEBUG')))
 
 
 # Application definition
@@ -91,15 +96,15 @@ DATABASES = {
     }
 }
 
-# DATABASES = {
+# DATABASES ={
 # 'default': {
-#     'ENGINE': 'django.db.backends.postgresql',
-#     'NAME': 'test',
-#     'USER': 'mohammad',
-#     'PASSWORD': '1234',
-#     'HOST': 'db', 
-#     'PORT': '5432', 
-#     }
+# 'ENGINE': 'django.db.backends.postgresql',
+# 'NAME': os.getenv('DB_NAME'),
+# 'USER': os.getenv('DB_USER'),
+# 'PASSWORD': os.getenv('DB_PASSWD'),
+# 'HOST': os.getenv('DB_HOST'),
+# 'PORT': os.getenv('DB_PORT'),
+# }
 # }
 
 # DATABASES = {
@@ -189,17 +194,17 @@ SIMPLE_JWT = {
 }
 
 # Redis Config
-REDIS_HOST = 'localhost'
-REDIS_PORT = 6379
-REDIS_DB = 0
+REDIS_HOST = os.getenv('REDIS_HOST')
+REDIS_PORT = os.getenv('REDIS_PORT')
+REDIS_DB = os.getenv('REDIS_DB')
 
 # Email Config
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'shojaeim2000@gmail.com'
-EMAIL_HOST_PASSWORD = 'zxaq hwrl yxcf mlki'
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND')
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_PORT = os.getenv('EMAIL_PORT')
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 
 # Drf spectacular
 SPECTACULAR_SETTINGS = {
@@ -210,5 +215,6 @@ SPECTACULAR_SETTINGS = {
 }
 
 # celery config
-CELERY_BROKER_URL = "amqp://guest:guest@localhost:5672/"
-CELERY_RESULT_BACKEND = "redis://localhost:6379"
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND')
+
