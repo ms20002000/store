@@ -50,21 +50,27 @@ class ProductFile(BaseModel):
 
     
 class TopicFile(BaseModel):
-    name = models.CharField(max_length=255, unique=True)
+    title = models.CharField(max_length=255, unique=True)
     description = models.TextField()
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='topic_file')
-    product_movie = models.URLField(
+    topic_photo = models.URLField(
         max_length=200,
         blank=True,
         null=True,
         validators=[URLValidator()]
     )
-    product_photo = models.URLField(
+
+class TopicMedia(BaseModel):
+    title = models.CharField(max_length=255, unique=True)
+    description = models.TextField()
+    topic_file = models.ForeignKey(TopicFile, on_delete=models.CASCADE, related_name='topic_media')
+    topic_movie = models.URLField(
         max_length=200,
         blank=True,
         null=True,
         validators=[URLValidator()]
     )
+
 
 
 class Attributes(BaseModel):

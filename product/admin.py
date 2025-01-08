@@ -21,7 +21,7 @@ class ProductAdmin(admin.ModelAdmin):
 
 @admin.register(ProductFile)
 class ProductFileAdmin(admin.ModelAdmin):
-    list_display = ('product', 'product_movie', 'product_photo')  
+    list_display = ('product', 'product_photo')  
     search_fields = ('product__name',)  
     list_filter = ('product',)  
     ordering = ('product',)  
@@ -29,10 +29,10 @@ class ProductFileAdmin(admin.ModelAdmin):
 
 @admin.register(TopicFile)
 class TopicFileAdmin(admin.ModelAdmin):
-    list_display = ('name', 'product', 'product_movie', 'product_photo')  
-    search_fields = ('name', 'product__name')  
+    list_display = ('title', 'product', 'topic_photo')  
+    search_fields = ('title', 'product__name')  
     list_filter = ('product',)
-    ordering = ('name',)  
+    ordering = ('title',)  
 
 
 @admin.register(Attributes)
