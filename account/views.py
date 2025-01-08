@@ -1,12 +1,14 @@
+from rest_framework.permissions import IsAuthenticated
+from order.models import Order, OrderItem
+from product.models import Product
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from django.contrib.auth.models import Group
 from .models import CustomUser, OTPCode
 from .serializers import UserRegistrationSerializer
 from .utils import send_otp_email
 from rest_framework_simplejwt.tokens import RefreshToken
-import json
+from product.serializers import ProductSerializer
 
 
 class RegisterView(APIView):
@@ -109,3 +111,17 @@ class LoginView(APIView):
             return Response({"message": "OTP sent to your email"}, status=status.HTTP_200_OK)
         except CustomUser.DoesNotExist:
             return Response({"error": "User not found. Please register first."}, status=status.HTTP_404_NOT_FOUND)
+        
+
+
+class UserPurchasedProductsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        completed_orders = Order.objects.filter(user=request.user, status='completed')
+        purchased_products = Product.objects.filter(
+            id__in=OrderItem.objects.filter(order__in=completed_orders).values_list('product_id', flat=True)
+        ).distinct()
+
+        products_data = ProductSerializer(purchased_products, many=True).data
+        return Response({"products": products_data})

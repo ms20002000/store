@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 from .models import Product, Category
-from .serializers import ProductSerializer, CategorySerializer
+from .serializers import *
 from rest_framework.filters import SearchFilter
 
 
@@ -21,6 +21,14 @@ class CategoryProductsView(ListAPIView):
         return Product.objects.filter(category__name=category_name)
     
 
+class SubcategoryListView(ListAPIView):
+    serializer_class = SubCategorySerializer
+
+    def get_queryset(self):
+        parent_name = self.kwargs.get('parent_name')  
+        parent = get_object_or_404(Category, name=parent_name)  
+        return Category.objects.filter(parent=parent)
+
 class CategoryListView(ListAPIView):
     queryset = Category.objects.filter(parent=None)
     serializer_class = CategorySerializer
@@ -32,24 +40,10 @@ class CategoryListView(ListAPIView):
             queryset = queryset[:int(limit)]
         return queryset
     
-class CategoryDetailView(RetrieveAPIView):
-    serializer_class = CategorySerializer
 
-    def get_object(self):
-        category_name = self.kwargs['name']
-        category = get_object_or_404(
-            Category.objects.filter(name=category_name)   
-        )
-        return category
-    
-class SubcategoryListView(ListAPIView):
-    serializer_class = CategorySerializer
-
-    def get_queryset(self):
-        parent_name = self.kwargs.get('parent_name')  
-        parent = get_object_or_404(Category, name=parent_name)  
-        return Category.objects.filter(parent=parent)
-
+class AllCategoryListView(ListAPIView):
+    queryset = Category.objects.filter(parent=None)
+    serializer_class = AllCategorySerializer
     
 class ProductListView(ListAPIView):
     queryset = Product.objects.prefetch_related('product_file').all()

@@ -30,3 +30,30 @@ class CategorySerializer(serializers.HyperlinkedModelSerializer):
         model = Category
         fields = ['id', 'name', 'category_photo', 'products', 'parent']
 
+
+class SubCategorySerializer(serializers.ModelSerializer):
+    products = serializers.HyperlinkedIdentityField(
+        view_name='category-products',  
+        lookup_field='name'              
+    )
+
+    class Meta:
+        model = Category
+        fields = ['id', 'name', 'parent', 'products']
+
+class SubcategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['id', 'name']
+
+
+class AllCategorySerializer(serializers.ModelSerializer):
+    products = serializers.HyperlinkedIdentityField(
+        view_name='category-products',  
+        lookup_field='name'              
+    )
+    subcategories = SubcategorySerializer(many=True)
+
+    class Meta:
+        model = Category
+        fields = ['id', 'name', 'parent', 'subcategories', 'products']
