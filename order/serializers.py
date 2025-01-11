@@ -2,13 +2,16 @@ from rest_framework import serializers
 from .models import Order, OrderItem
 from product.models import Product
 from discount.models import Coupon
-from product.serializers import ProductSerializer
 
 class OrderItemSerializer(serializers.ModelSerializer):
-    # product = ProductSerializer(many=True)
+    product_name = serializers.SerializerMethodField()
+
     class Meta:
         model = OrderItem
-        fields = ['product', 'price']
+        fields = ['product', 'price', 'product_name']
+
+    def get_product_name(self, obj):
+        return obj.product.name
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -17,7 +20,7 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ['user', 'status', 'total_price', 'items', 'coupon_code']
+        fields = ['user', 'status', 'total_price', 'items', 'coupon_code', 'created_at']
 
     def validate(self, data):
         for item in data['items']:

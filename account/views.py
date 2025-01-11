@@ -5,10 +5,11 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import CustomUser, OTPCode
-from .serializers import UserRegistrationSerializer
+from .serializers import UserRegistrationSerializer, EditProfileSerializer, LoginSerializer
 from .utils import send_otp_email
 from rest_framework_simplejwt.tokens import RefreshToken
 from product.serializers import ProductSerializer
+from django.shortcuts import get_object_or_404
 
 
 class RegisterView(APIView):
@@ -45,54 +46,20 @@ class VerifyOTPView(APIView):
         if not email or not otp_code:
             return Response({"error": "Email and OTP code are required."}, status=status.HTTP_400_BAD_REQUEST)
 
-        stored_otp = OTPCode.get_otp_code(email)
-            
+        stored_otp = OTPCode.get_otp_code(email)        
         if stored_otp and stored_otp.decode() == otp_code:
             if login == 'true':
                 user = CustomUser.objects.get(email=email)
-                refresh = RefreshToken.for_user(user)
-                response = Response({
-                    "message": "Login successful.",
-                    "refresh": str(refresh),  
-                    "email": email,
-                    "profile_picture": user.profile_picture,
-                }, status=status.HTTP_200_OK)
-                
-                # set access token in cookie
-                response.set_cookie(
-                    key='access_token',
-                    value=str(refresh.access_token),
-                    httponly=False, 
-                    samesite='Lax',  
-                )
-                return response
+                return set_token(user, email)
             
             if (user_data:=OTPCode.get_user_data(email)):
                 user_serializer = UserRegistrationSerializer(data=user_data)
                 if user_serializer.is_valid():
                     user = user_serializer.save()
-                    refresh = RefreshToken.for_user(user)
-
-                    response = Response({
-                        "message": "Registration successful.",
-                        "refresh": str(refresh),  
-                        "email": email,
-                        "profile_picture": user.profile_picture,
-                    }, status=status.HTTP_201_CREATED)
-
-                    # set access token in cookie
-                    response.set_cookie(
-                        key='access_token',
-                        value=str(refresh.access_token),
-                        httponly=False,
-                        samesite='Lax',
-                    )
-                    return response
+                    return set_token(user, email, login=False)
                 
                 return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
             return Response({"error": "User data not found. Please restart registration."}, status=status.HTTP_400_BAD_REQUEST)
-        
         return Response({"error": "Invalid OTP."}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -125,3 +92,58 @@ class UserPurchasedProductsView(APIView):
 
         products_data = ProductSerializer(purchased_products, many=True).data
         return Response({"products": products_data})
+
+
+class EditProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        serializer = EditProfileSerializer(instance=user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def put(self, request):
+        user = request.user
+        serializer = EditProfileSerializer(instance=user, data=request.data, context={'request': request})
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                "message": "Profile updated successfully!",
+                "data": serializer.data
+            }, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class LoginPasswordView(APIView):
+    def post(self, request):
+        serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data['email']
+            user = get_object_or_404(CustomUser, email=email)
+            return set_token(user, email)
+        else:
+            return Response({"error": "Invalid password."}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+def set_token(user, email, login=True):
+    refresh = RefreshToken.for_user(user)
+    if login:
+        status_code = status.HTTP_200_OK
+    else:
+        status_code = status.HTTP_201_CREATED
+    response = Response({
+        "message": "Login successful.",
+        "refresh": str(refresh),  
+        "email": email,
+        "profile_picture": user.profile_picture,
+    }, status=status_code)
+    
+    # set access token in cookie
+    response.set_cookie(
+        key='access_token',
+        value=str(refresh.access_token),
+        httponly=False, 
+        samesite='Lax',  
+    )
+    return response

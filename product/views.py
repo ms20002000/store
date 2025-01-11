@@ -68,6 +68,14 @@ class ProductDetailView(RetrieveAPIView):
             name=product_name
         )
         return product
+    
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({
+            'request': self.request,
+            'product': self.get_object()
+        })
+        return context
 
 
 class ProductSearchView(ListAPIView):

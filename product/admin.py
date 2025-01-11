@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Product, ProductFile, TopicFile, Attributes
+from .models import *
 
 
 @admin.register(Category)
@@ -29,10 +29,17 @@ class ProductFileAdmin(admin.ModelAdmin):
 
 @admin.register(TopicFile)
 class TopicFileAdmin(admin.ModelAdmin):
-    list_display = ('title', 'product', 'topic_photo')  
+    list_display = ('title', 'product', 'description', 'topic_photo')  
     search_fields = ('title', 'product__name')  
     list_filter = ('product',)
     ordering = ('title',)  
+
+@admin.register(TopicMedia)
+class TopicMediaAdmin(admin.ModelAdmin):
+    list_display = ('title', 'topic_file', 'description', 'topic_movie')  
+    search_fields = ('title', 'topic_file__product__name')  
+    list_filter = ('topic_file__product',)
+    ordering = ('title',)
 
 
 @admin.register(Attributes)
