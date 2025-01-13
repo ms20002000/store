@@ -50,3 +50,14 @@ class OrderSerializer(serializers.ModelSerializer):
             OrderItem.objects.create(order=order, **item_data)
 
         return order
+
+
+class PaymentVerificationSerializer(serializers.Serializer):
+    status = serializers.CharField(max_length=10, required=True)
+    authority = serializers.CharField(max_length=50, required=True)
+
+    def validate(self, data):
+        # Add custom validation if needed, for example checking specific status values
+        if data['status'] not in ['OK', 'NOK']:
+            raise serializers.ValidationError("Invalid payment status.")
+        return data

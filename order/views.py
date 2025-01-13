@@ -2,10 +2,12 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from .serializers import OrderSerializer
+from .serializers import OrderSerializer, PaymentVerificationSerializer
 from .models import *
 from discount.models import Coupon
 from django.utils.timezone import now
+from .utils import send_request
+from account.redis import OTPCode
 
 class CreateOrderView(APIView):
     permission_classes = [IsAuthenticated]
@@ -23,9 +25,12 @@ class CreateOrderView(APIView):
             # Validate input data
             errors = self.validate_input_data(user, cart, total_price, discount)
             if errors:
-                print(errors)
                 return Response({"errors": errors}, status=status.HTTP_400_BAD_REQUEST)
 
+            request_response = send_request(amount=int(total_price), email=user.email, phone=user.phone_number)
+            if not request_response['status']:
+                return Response({"error": "Failed to send request to the Payment Gateway."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
             discount_code = discount.code if discount else discount_code
             order_data = self.set_order_data(user, cart, total_price, discount_code)
             serializer = OrderSerializer(data=order_data)
@@ -33,13 +38,13 @@ class CreateOrderView(APIView):
                 order = serializer.save() 
                 if discount_code: 
                     discount.mark_as_used()
+                OTPCode.save_authority_to_redis(request_response['authority'], order.id)
                 return Response(
-                    {"order_id": order.id, "message": "Order created successfully."},
+                    {"url": request_response['url'], "message": "Order created successfully."},
                     status=status.HTTP_201_CREATED
                 )
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            print(e)
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def validate_input_data(self, user, cart, total_price, discount_code):
@@ -92,6 +97,24 @@ class CreateOrderView(APIView):
                 "coupon_code": discount_code
             }
         return order_data
+
+
+class PaymentVerificationView(APIView):
+    def post(self, request):
+        serializer = PaymentVerificationSerializer(data=request.data)
+
+        if serializer.is_valid():
+            status_value = serializer.validated_data.get('status')
+            authority = serializer.validated_data.get('authority')
+            order_id = OTPCode.get_order_id_by_authority(authority)
+
+            if status_value == 'OK':
+                return Response({"success": True, "message": "Payment verified successfully."}, status=status.HTTP_200_OK)
+            else:
+                Order.objects.filter(id=order_id).update(status='cancelled')
+                return Response({"success": False, "message": "Payment failed or was cancelled."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserOrderListView(APIView):

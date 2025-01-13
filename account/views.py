@@ -4,7 +4,8 @@ from product.models import Product
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import CustomUser, OTPCode
+from .models import CustomUser
+from .redis import OTPCode
 from .serializers import UserRegistrationSerializer, EditProfileSerializer, LoginSerializer
 from .utils import send_otp_email
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -57,7 +58,7 @@ class VerifyOTPView(APIView):
                 if user_serializer.is_valid():
                     user = user_serializer.save()
                     return set_token(user, email, login=False)
-                
+                print(user_serializer.errors)
                 return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             return Response({"error": "User data not found. Please restart registration."}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"error": "Invalid OTP."}, status=status.HTTP_400_BAD_REQUEST)
