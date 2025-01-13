@@ -27,7 +27,7 @@ class CreateOrderView(APIView):
             if errors:
                 return Response({"errors": errors}, status=status.HTTP_400_BAD_REQUEST)
 
-            request_response = send_request(amount=int(total_price), email=user.email, phone=user.phone_number)
+            request_response = send_request(amount=float(total_price), email=user.email, phone=user.phone_number)
             if not request_response['status']:
                 return Response({"error": "Failed to send request to the Payment Gateway."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
@@ -45,6 +45,7 @@ class CreateOrderView(APIView):
                 )
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
+            print(e)
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def validate_input_data(self, user, cart, total_price, discount_code):
@@ -112,6 +113,7 @@ class PaymentVerificationView(APIView):
                 return Response({"success": True, "message": "Payment verified successfully."}, status=status.HTTP_200_OK)
             else:
                 Order.objects.filter(id=order_id).update(status='cancelled')
+                Coupon.objects.filter(order__id=order_id).update(is_used=False)
                 return Response({"success": False, "message": "Payment failed or was cancelled."}, status=status.HTTP_400_BAD_REQUEST)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
