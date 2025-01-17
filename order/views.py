@@ -113,7 +113,7 @@ class PaymentVerificationView(APIView):
                 return Response({"success": True, "message": "Payment verified successfully."}, status=status.HTTP_200_OK)
             else:
                 Order.objects.filter(id=order_id).update(status='cancelled')
-                Coupon.objects.filter(order__id=order_id).update(is_used=False)
+                Coupon.objects.filter(order__id=order_id).update(is_used=False) 
                 return Response({"success": False, "message": "Payment failed or was cancelled."}, status=status.HTTP_400_BAD_REQUEST)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
