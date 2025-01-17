@@ -30,8 +30,8 @@ The Store backend provides a robust and scalable API for managing products, orde
 
 1. **Clone the repository**:
     ```bash
-    git clone https://github.com/yourusername/store-backend.git
-    cd store-backend
+    git clone https://github.com/ms20002000/store.git
+    cd store
     ```
 
 2. **Install dependencies**:
