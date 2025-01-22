@@ -89,23 +89,23 @@ WSGI_APPLICATION = 'store.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
-# DATABASES ={
-# 'default': {
-# 'ENGINE': 'django.db.backends.postgresql',
-# 'NAME': os.getenv('DB_NAME'),
-# 'USER': os.getenv('DB_USER'),
-# 'PASSWORD': os.getenv('DB_PASSWD'),
-# 'HOST': os.getenv('DB_HOST'),
-# 'PORT': os.getenv('DB_PORT'),
-# }
-# }
+DATABASES ={
+'default': {
+'ENGINE': 'django.db.backends.postgresql',
+'NAME': os.getenv('DB_NAME'),
+'USER': os.getenv('DB_USER'),
+'PASSWORD': os.getenv('DB_PASSWD'),
+'HOST': os.getenv('DB_HOST'),
+'PORT': os.getenv('DB_PORT'),
+}
+}
 
 # DATABASES = {
 # 'default': {
@@ -166,9 +166,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'account.CustomUser'
 
-INTERNAL_IPS = [
-    '127.0.0.1',
-]
 
 #media
 MEDIA_URL = '/media/'
@@ -217,4 +214,3 @@ SPECTACULAR_SETTINGS = {
 # celery config
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
 CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND')
-

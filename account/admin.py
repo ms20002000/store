@@ -1,6 +1,10 @@
 from django.contrib import admin
 from account.models import CustomUser
 
+admin.site.site_header = "Store Admin Panel"
+admin.site.site_title = "Store Administration"
+admin.site.index_title = "Welcome to the Store Admin Panel"
+
 @admin.register(CustomUser)
 class CustomUserAdmin(admin.ModelAdmin):
     list_display = ('phone_number', 'first_name', 'last_name', 'role', 'is_active')

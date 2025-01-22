@@ -9,6 +9,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     def validate_phone_number(self, value):
         if CustomUser.objects.filter(phone_number=value).exists():
             raise serializers.ValidationError("Phone number already registered.")
+        elif len(value) != 10:
+            raise serializers.ValidationError("Invalid phone number.")
         return value
 
     def validate_email(self, value):

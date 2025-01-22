@@ -7,12 +7,16 @@ services:
     volumes:
       - ./:/usr/src/app/  
       - static_volume:/usr/src/app/static/
-    ports:
-      - 8000:8000
+    # ports:
+    #   - 8000:8000
+    expose:
+      - 8000
     env_file:
       - ./.env
     depends_on:
       - db
+    networks:
+      - web
 
   db:
     image: postgres:16-alpine
@@ -22,6 +26,8 @@ services:
       - POSTGRES_USER=mohammad
       - POSTGRES_PASSWORD=1234
       - POSTGRES_DB=test
+    networks:
+      - web
 
     # rabbitmq:
     #   hostname: rabbitmq
@@ -51,13 +57,18 @@ services:
     volumes:
       - static_volume:/usr/src/app/static/
     ports:
-      - 8080:80
+      - "80:80"
     depends_on:
+      - web
+    networks:
       - web
 
 volumes:
   postgres_data:
   static_volume:
+
+networks:
+  web:
 
   # react:
   #   build:
