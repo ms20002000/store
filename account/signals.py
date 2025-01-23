@@ -11,7 +11,8 @@ def create_default_groups(sender, **kwargs):
     customer_group, _ = Group.objects.get_or_create(name='Customer')
 
     permissions = Permission.objects.filter(
-        codename__in=['add_product', 'change_product', 'delete_product', 'add_category', 'change_category', 'delete_category', 'add_discount', 'change_discount', 'delete_discount']
+        codename__in=['add_product', 'change_product', 'delete_product', 'add_category', 'change_category', 'delete_category', 'add_discount', 'change_discount', 'delete_discount',
+                      'add_productfile', 'change_productfile', 'delete_productfile', 'add_topicfile', 'change_topicfile', 'delete_topicfile', 'add_topicmedia', 'change_topicmedia', 'delete_topicmedia']
     )
     manager_group.permissions.set(permissions)
     manager_group.save()
