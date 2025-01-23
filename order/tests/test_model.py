@@ -1,37 +1,51 @@
 from django.test import TestCase
+from order.models import Order, OrderItem
 from account.models import CustomUser
 from product.models import Product, Category
-from order.models import Order, OrderItem
+from discount.models import Coupon
 
-class OrderModelTest(TestCase):
+class OrderModelTests(TestCase):
     def setUp(self):
-        self.user = CustomUser.objects.create_user(
-            phone_number="1234567890",
-            password="password123"
+        self.user = CustomUser.objects.create(
+            email="testuser@example.com", 
+            first_name="Test", 
+            last_name="User", 
+            phone_number="1234567890"
         )
-        self.category = Category.objects.create(name="Electronics")
+        self.category = Category.objects.create(name="Category 1")
         self.product = Product.objects.create(
-            name="Smartphone",
-            brand="BrandX",
-            price=499.99,
-            stock_quantity=50,
-            category=self.category
+            name="Test Product",
+            teacher="John Doe",
+            price=100.00,
+            description="Test Description",
+            category=self.category,
+            course_time="01:30:00",
+            prerequisite="None"
+        )
+        self.coupon = Coupon.objects.create(
+            amount=10,
+            start_date="2025-01-01 00:00:00",
+            expire_at="2025-12-31 23:59:59",
+            user=self.user
         )
         self.order = Order.objects.create(
             user=self.user,
-            status="pending",
-            payment_method="credit_card",
-            address="123 Main St"
+            status="completed",
+            coupon=self.coupon,
+            total_price=90.00
         )
         self.order_item = OrderItem.objects.create(
             order=self.order,
             product=self.product,
-            quantity=2
+            price=90.00
         )
 
     def test_order_creation(self):
-        self.assertEqual(str(self.order), f"Order {self.order.id} - pending")
-
+        self.assertEqual(Order.objects.count(), 1)
+        self.assertEqual(self.order.status, "completed")
+        self.assertEqual(self.order.total_price, 90.00)
+    
     def test_order_item_creation(self):
-        self.assertEqual(str(self.order_item), f"2 x Smartphone (Order {self.order.id})")
-        self.assertEqual(self.order_item.quantity, 2)
+        self.assertEqual(OrderItem.objects.count(), 1)
+        self.assertEqual(self.order_item.product.name, "Test Product")
+        self.assertEqual(self.order_item.price, 90.00)

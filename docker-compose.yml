@@ -3,12 +3,10 @@ version: '1.0'
 services:
   web:
     build: ./
-    command: gunicorn store.wsgi:application --bind 0.0.0.0:8000
+    command: gunicorn store.wsgi:application --bind 0.0.0.0:8000 --workers=3 --timeout=120
     volumes:
       - ./:/usr/src/app/  
       - static_volume:/usr/src/app/static/
-    # ports:
-    #   - 8000:8000
     expose:
       - 8000
     env_file:
@@ -29,33 +27,34 @@ services:
     networks:
       - web
 
-    # rabbitmq:
-    #   hostname: rabbitmq
-    #   image: rabbitmq:3-management
-    #   ports:
-    #     - 5672:5672
-    #     - 15672:15672
-    #   # env_file:
-    #   #   - rabbitmq/.env
-    #   environment:
-    #     - RABBITMQ_NODE_IP_ADDRESS=0.0.0.0
-    #     - RABBITMQ_DEFAULT_USER=myuser
-    #     - RABBITMQ_DEFAULT_PASS=mypassword
-    #     - RABBITMQ_HOST=rabbitmq
-    #     - RABBITMQ_PORT=5672
-    #     - RABBITMQ_QUEUE=my_queue
+  rabbitmq:
+    hostname: rabbitmq
+    image: rabbitmq:3-management
+    ports:
+      - 5672:5672
+      - 15672:15672
+    environment:
+      - RABBITMQ_NODE_IP_ADDRESS=0.0.0.0
+      - RABBITMQ_DEFAULT_USER=myuser
+      - RABBITMQ_DEFAULT_PASS=mypassword
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_QUEUE=my_queue
+    networks:
+      - web
   
-  # redis:
-  #   image: redis
-  #   ports:
-  #     - "6379:6379"
-  #   environment:
-  #     - REDIS_USER=myuser
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - web
   
   nginx:
     build: ./nginx
     volumes:
       - static_volume:/usr/src/app/static/
+      # - ./frontend/:/usr/src/app/frontend/
     ports:
       - "80:80"
     depends_on:
@@ -63,16 +62,17 @@ services:
     networks:
       - web
 
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #   ports:
+  #     - "3000:80"
+  #   networks:
+  #     - web
+
 volumes:
   postgres_data:
   static_volume:
 
 networks:
   web:
-
-  # react:
-  #   build:
-  #   context: ./M102_front/M102_Final
-  #   volumes:
-  #   - react:/react
-  #   - react_build:/react/dist

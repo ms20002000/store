@@ -1,25 +1,25 @@
 from django.test import TestCase
-from product.models import Category, Product, Attributes
+from product.models import Category, Product
 
-class ProductModelTest(TestCase):
+class ProductModelTests(TestCase):
     def setUp(self):
-        self.category = Category.objects.create(name="Electronics")
+        self.category = Category.objects.create(name="Category 1")
         self.product = Product.objects.create(
-            name="Smartphone",
-            brand="BrandX",
-            price=499.99,
-            description="A high-quality smartphone.",
-            stock_quantity=50,
-            category=self.category
+            name="Test Product",
+            teacher="John Doe",
+            price=100.00,
+            description="Test Description",
+            category=self.category,
+            course_time="01:30:00",
+            prerequisite="None"
         )
-        self.attribute = Attributes.objects.create(name="Color", value="Black")
 
     def test_category_creation(self):
-        self.assertEqual(str(self.category), "Electronics")
+        self.assertEqual(Category.objects.count(), 1)
+        self.assertEqual(self.category.name, "Category 1")
 
     def test_product_creation(self):
-        self.assertEqual(str(self.product), "Smartphone (BrandX)")
-        self.assertEqual(self.product.stock_quantity, 50)
-
-    def test_attribute_creation(self):
-        self.assertEqual(str(self.attribute), "Color: Black")
+        self.assertEqual(Product.objects.count(), 1)
+        self.assertEqual(self.product.name, "Test Product")
+        self.assertEqual(self.product.teacher, "John Doe")
+        self.assertEqual(self.product.category.name, "Category 1")
